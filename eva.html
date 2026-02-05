@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Eva ma bataille</title>
+
+<style>
+  body {
+    margin: 0;
+    height: 100vh;
+    background: #fdf2f8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+  }
+
+  .box {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-align: center;
+    position: relative;
+    width: 320px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  }
+
+  h2 {
+    margin-bottom: 20px;
+  }
+
+  #buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 50px;
+    height: 80px;
+    position: relative;
+  }
+
+  button {
+    padding: 12px 22px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    border: none;
+  }
+
+  #yes {
+    background: #22c55e;
+    color: white;
+    transition: transform 0.2s ease;
+    z-index: 1;
+  }
+
+  #no {
+    background: #ef4444;
+    color: white;
+    position: relative;
+    z-index: 10;
+  }
+
+  #gif {
+    display: none;
+    margin-top: 20px;
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  #message {
+    display: none;
+    margin-top: 15px;
+    font-weight: bold;
+    font-size: 18px;
+  }
+
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2 id="question">envoie tes boobs sur snap ? 💖</h2>
+
+  <div id="buttons">
+    <button id="yes">Oui</button>
+    <button id="no">Non</button>
+  </div>
+
+  <img id="gif" src="cool.gif">
+  <p id="message">ah la tu me mets bien ma bataille 😏</p>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<audio id="noSound" src="no.mp3"></audio>
+<audio id="yesMusic" src="music.mp3"></audio>
+
+<script>
+  const noBtn = document.getElementById("no");
+  const yesBtn = document.getElementById("yes");
+  const buttons = document.getElementById("buttons");
+  const question = document.getElementById("question");
+  const gif = document.getElementById("gif");
+  const message = document.getElementById("message");
+
+  const noSound = document.getElementById("noSound");
+  const yesMusic = document.getElementById("yesMusic");
+
+  let scale = 1;
+  let noIsAbsolute = false;
+
+  function moveNoButton() {
+    const maxX = buttons.clientWidth - noBtn.offsetWidth;
+    const maxY = buttons.clientHeight - noBtn.offsetHeight;
+
+    noBtn.style.left = Math.random() * maxX + "px";
+    noBtn.style.top = Math.random() * maxY + "px";
+
+    scale += 0.15;
+    yesBtn.style.transform = `scale(${scale})`;
+  }
+
+  // NON s’échappe AVANT la souris
+  buttons.addEventListener("mousemove", (e) => {
+    const btnRect = noBtn.getBoundingClientRect();
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+
+    const centerX = btnRect.left + btnRect.width / 2;
+    const centerY = btnRect.top + btnRect.height / 2;
+
+    const distance = Math.hypot(mouseX - centerX, mouseY - centerY);
+
+    if (distance < 80) {
+      if (!noIsAbsolute) {
+        const containerRect = buttons.getBoundingClientRect();
+        noBtn.style.position = "absolute";
+        noBtn.style.left = (btnRect.left - containerRect.left) + "px";
+        noBtn.style.top = (btnRect.top - containerRect.top) + "px";
+        noBtn.style.zIndex = "10";
+        noIsAbsolute = true;
+      }
+      moveNoButton();
+    }
+  });
+
+  // Si elle clique sur NON (exploit)
+  noBtn.addEventListener("click", () => {
+    noSound.currentTime = 0;
+    noSound.play();
+    setTimeout(() => location.reload(), 500);
+  });
+
+  // Clic sur OUI
+  yesBtn.addEventListener("click", () => {
+    question.style.display = "none";
+    buttons.style.display = "none";
+    gif.style.display = "block";
+    message.style.display = "block";
+
+    yesMusic.currentTime = 0;
+    yesMusic.play();
+    startConfetti(5000); // 🎉 confettis 5 secondes
+  });
+
+  // CONFETTIS
+  const canvas = document.getElementById("confetti");
+  const ctx = canvas.getContext("2d");
+
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const confettis = Array.from({ length: 150 }, () => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 6 + 4,
+    d: Math.random() * 5 + 2,
+    color: `hsl(${Math.random() * 360}, 100%, 60%)`
+  }));
+
+  function startConfetti(duration) {
+    const start = Date.now();
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      confettis.forEach(c => {
+        ctx.beginPath();
+        ctx.fillStyle = c.color;
+        ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+        ctx.fill();
+        c.y += c.d;
+        if (c.y > canvas.height) c.y = -10;
+      });
+
+      if (Date.now() - start < duration) {
+        requestAnimationFrame(draw);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    draw();
+  }
+</script>
+
+</body>
+</html>
