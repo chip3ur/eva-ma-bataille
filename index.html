@@ -61,6 +61,23 @@
     z-index: 10;
   }
 
+  #snapBtn {
+    display: none;
+    background: #fffc00;
+    color: black;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    font-weight: bold;
+  }
+
+  #snapText {
+    font-weight: bold;
+    font-size: 16px;
+    color: #333;
+  }
+
   #gif {
     display: none;
     margin-top: 20px;
@@ -94,6 +111,12 @@
     <button id="no">Non</button>
   </div>
 
+  <!-- Snap + texte -->
+  <div style="margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+    <button id="snapBtn">Snap</button>
+    <span id="snapText">ajoute moi ma bataille</span>
+  </div>
+
   <img id="gif" src="cool.gif">
   <p id="message">ah la tu me mets bien ma bataille 😏</p>
 </div>
@@ -110,6 +133,7 @@
   const question = document.getElementById("question");
   const gif = document.getElementById("gif");
   const message = document.getElementById("message");
+  const snapBtn = document.getElementById("snapBtn");
 
   const noSound = document.getElementById("noSound");
   const yesMusic = document.getElementById("yesMusic");
@@ -117,12 +141,10 @@
   let scale = 1;
   let noIsAbsolute = false;
 
-  // Fonction pour détecter mobile
   function isMobile() {
     return /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
   }
 
-  // Fonction pour déplacer le bouton NON
   function moveNoButton() {
     const maxX = buttons.clientWidth - noBtn.offsetWidth;
     const maxY = buttons.clientHeight - noBtn.offsetHeight;
@@ -135,12 +157,10 @@
   }
 
   if (isMobile()) {
-    // MOBILE : faire fuir le bouton au toucher
     noBtn.addEventListener("touchstart", () => {
       moveNoButton();
     });
   } else {
-    // PC : faire fuir le bouton au survol
     buttons.addEventListener("mousemove", (e) => {
       const btnRect = noBtn.getBoundingClientRect();
       const mouseX = e.clientX;
@@ -165,23 +185,40 @@
     });
   }
 
-  // Si elle clique sur NON (exploit)
   noBtn.addEventListener("click", () => {
     noSound.currentTime = 0;
     noSound.play();
     setTimeout(() => location.reload(), 500);
   });
 
-  // Clic sur OUI
   yesBtn.addEventListener("click", () => {
     question.style.display = "none";
     buttons.style.display = "none";
     gif.style.display = "block";
     message.style.display = "block";
 
+    // Baisser le volume de la musique
+    yesMusic.volume = 0.2;
     yesMusic.currentTime = 0;
     yesMusic.play();
-    startConfetti(5000); // 🎉 confettis 5 secondes
+    startConfetti(5000);
+
+    // Afficher le bouton Snap et le texte
+    snapBtn.style.display = "inline-block";
+    document.getElementById("snapText").style.display = "inline-block";
+  });
+
+  snapBtn.addEventListener("click", () => {
+    // Jouer le son no.mp3 quand Snap est cliqué
+    noSound.currentTime = 0;
+    noSound.play();
+
+    const box = document.querySelector(".box");
+    box.innerHTML = `
+      <img src="shrek.gif" style="width:100%;border-radius:10px;margin-bottom:15px;">
+      <img src="snapcode.png" style="width:100%;border-radius:10px;margin-bottom:15px;">
+      <p style="font-weight:bold;font-size:18px;">à plus tard dans tes DM ma bataille 💖🔥</p>
+    `;
   });
 
   // CONFETTIS
@@ -201,10 +238,8 @@
 
   function startConfetti(duration) {
     const start = Date.now();
-
     function draw() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-
       confettis.forEach(c => {
         ctx.beginPath();
         ctx.fillStyle = c.color;
@@ -213,18 +248,15 @@
         c.y += c.d;
         if (c.y > canvas.height) c.y = -10;
       });
-
       if (Date.now() - start < duration) {
         requestAnimationFrame(draw);
       } else {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
     }
-
     draw();
   }
 
-  // Ajuste le canvas si on redimensionne la fenêtre
   window.addEventListener("resize", () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
