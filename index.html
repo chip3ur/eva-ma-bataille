@@ -72,12 +72,6 @@
     font-weight: bold;
   }
 
-  #snapText {
-    font-weight: bold;
-    font-size: 16px;
-    color: #333;
-  }
-
   #gif {
     display: none;
     margin-top: 20px;
@@ -111,10 +105,9 @@
     <button id="no">Non</button>
   </div>
 
-  <!-- Snap + texte -->
+  <!-- Snap (invisible au départ) -->
   <div style="margin-top: 20px; display: flex; justify-content: center; align-items: center; gap: 10px;">
     <button id="snapBtn">Snap</button>
-    <span id="snapText">ajoute moi ma bataille</span>
   </div>
 
   <img id="gif" src="cool.gif">
@@ -156,19 +149,16 @@
     yesBtn.style.transform = `scale(${scale})`;
   }
 
+  // NON s’échappe
   if (isMobile()) {
-    noBtn.addEventListener("touchstart", () => {
-      moveNoButton();
-    });
+    noBtn.addEventListener("touchstart", () => moveNoButton());
   } else {
     buttons.addEventListener("mousemove", (e) => {
       const btnRect = noBtn.getBoundingClientRect();
       const mouseX = e.clientX;
       const mouseY = e.clientY;
-
       const centerX = btnRect.left + btnRect.width / 2;
       const centerY = btnRect.top + btnRect.height / 2;
-
       const distance = Math.hypot(mouseX - centerX, mouseY - centerY);
 
       if (distance < 80) {
@@ -185,31 +175,35 @@
     });
   }
 
+  // Si elle clique sur NON
   noBtn.addEventListener("click", () => {
     noSound.currentTime = 0;
     noSound.play();
     setTimeout(() => location.reload(), 500);
   });
 
+  // Clic sur OUI
   yesBtn.addEventListener("click", () => {
     question.style.display = "none";
     buttons.style.display = "none";
     gif.style.display = "block";
     message.style.display = "block";
 
-    // Baisser le volume de la musique
+    // Jouer la musique et le son NO
     yesMusic.volume = 0.2;
     yesMusic.currentTime = 0;
     yesMusic.play();
+
+    noSound.currentTime = 0;
+    noSound.play();
+
     startConfetti(5000);
 
-    // Afficher le bouton Snap et le texte
-    snapBtn.style.display = "inline-block";
-    document.getElementById("snapText").style.display = "inline-block";
+    snapBtn.style.display = "inline-block"; // seul le bouton Snap apparaît
   });
 
+  // Clic sur Snap
   snapBtn.addEventListener("click", () => {
-    // Jouer le son no.mp3 quand Snap est cliqué
     noSound.currentTime = 0;
     noSound.play();
 
@@ -218,6 +212,7 @@
       <img src="shrek.gif" style="width:100%;border-radius:10px;margin-bottom:15px;">
       <img src="snapcode.png" style="width:100%;border-radius:10px;margin-bottom:15px;">
       <p style="font-weight:bold;font-size:18px;">à plus tard dans tes DM ma bataille 💖🔥</p>
+      <p id="snapText" style="font-weight:bold;font-size:16px;color:#333;">ajoute moi 😏</p>
     `;
   });
 
