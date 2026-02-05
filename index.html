@@ -117,6 +117,12 @@
   let scale = 1;
   let noIsAbsolute = false;
 
+  // Fonction pour détecter mobile
+  function isMobile() {
+    return /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent);
+  }
+
+  // Fonction pour déplacer le bouton NON
   function moveNoButton() {
     const maxX = buttons.clientWidth - noBtn.offsetWidth;
     const maxY = buttons.clientHeight - noBtn.offsetHeight;
@@ -128,29 +134,36 @@
     yesBtn.style.transform = `scale(${scale})`;
   }
 
-  // NON s’échappe AVANT la souris
-  buttons.addEventListener("mousemove", (e) => {
-    const btnRect = noBtn.getBoundingClientRect();
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
-
-    const centerX = btnRect.left + btnRect.width / 2;
-    const centerY = btnRect.top + btnRect.height / 2;
-
-    const distance = Math.hypot(mouseX - centerX, mouseY - centerY);
-
-    if (distance < 80) {
-      if (!noIsAbsolute) {
-        const containerRect = buttons.getBoundingClientRect();
-        noBtn.style.position = "absolute";
-        noBtn.style.left = (btnRect.left - containerRect.left) + "px";
-        noBtn.style.top = (btnRect.top - containerRect.top) + "px";
-        noBtn.style.zIndex = "10";
-        noIsAbsolute = true;
-      }
+  if (isMobile()) {
+    // MOBILE : faire fuir le bouton au toucher
+    noBtn.addEventListener("touchstart", () => {
       moveNoButton();
-    }
-  });
+    });
+  } else {
+    // PC : faire fuir le bouton au survol
+    buttons.addEventListener("mousemove", (e) => {
+      const btnRect = noBtn.getBoundingClientRect();
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      const centerX = btnRect.left + btnRect.width / 2;
+      const centerY = btnRect.top + btnRect.height / 2;
+
+      const distance = Math.hypot(mouseX - centerX, mouseY - centerY);
+
+      if (distance < 80) {
+        if (!noIsAbsolute) {
+          const containerRect = buttons.getBoundingClientRect();
+          noBtn.style.position = "absolute";
+          noBtn.style.left = (btnRect.left - containerRect.left) + "px";
+          noBtn.style.top = (btnRect.top - containerRect.top) + "px";
+          noBtn.style.zIndex = "10";
+          noIsAbsolute = true;
+        }
+        moveNoButton();
+      }
+    });
+  }
 
   // Si elle clique sur NON (exploit)
   noBtn.addEventListener("click", () => {
@@ -210,6 +223,12 @@
 
     draw();
   }
+
+  // Ajuste le canvas si on redimensionne la fenêtre
+  window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  });
 </script>
 
 </body>
